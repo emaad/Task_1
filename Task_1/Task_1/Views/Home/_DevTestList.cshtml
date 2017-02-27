@@ -1,0 +1,36 @@
+﻿<table class="table table-bordered table-striped">
+    <thead>
+        <tr>
+            <th></th>
+            <th>ID</th>
+            <th>CampaignName</th>
+            <th>Date</th>
+            <th>Clicks</th>
+            <th>Conversions</th>
+            <th>Impressions</th>
+            <th>AffiliateName</th>
+        </tr>
+    </thead>
+    <tbody>
+        @if (Model != null)
+        {
+            foreach (var item in Model)
+            {
+
+                <tr>
+                    <td><a href="#" onclick="GetRecord(@item.ID)">Edit</a> | <a href="#" onclick="DeleteRecord(@item.ID)">Delete</a></td>
+                    <td>@item.ID</td>
+                    <td>@item.CampaignName</td>
+                    <td>@item.Date</td>
+                    <td>@item.Clicks</td>
+                    <td>@item.Conversions</td>
+                    <td>@item.Impressions</td>
+                    <td>@item.AffiliateName</td>
+                </tr>
+            }
+        }
+
+    </tbody>
+</table>
+
+

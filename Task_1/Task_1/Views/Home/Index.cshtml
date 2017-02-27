@@ -1,0 +1,201 @@
+﻿@model Task_1.Models.DevTest
+@{
+    ViewBag.Title = "Home Page";
+}
+
+
+<div>
+    <h1 style="color: green">Task</h1>
+
+    <div class="row">
+        <div class="col-md-12">
+@using (Html.BeginForm(null, null, FormMethod.Post, new { id = "InfoForm" }))
+        {
+            <div class="form-group">
+                @Html.LabelFor(model => model.AffiliateName)
+                @Html.TextBoxFor(model => model.AffiliateName, new { maxLength = 255, autocomplete = "off", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.AffiliateName)
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.CampaignName)
+                @Html.TextBoxFor(model => model.CampaignName, new { maxLength = 255, autocomplete = "off", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.CampaignName)
+            </div>
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Clicks)
+                @Html.TextBoxFor(model => model.Clicks, new { maxLength = 5, autocomplete = "off", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Clicks)
+            </div>
+
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Conversions)
+                @Html.TextBoxFor(model => model.Conversions, new { maxLength = 5, autocomplete = "off", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Conversions)
+            </div>
+
+
+            <div class="form-group">
+                @Html.LabelFor(model => model.Impressions)
+                @Html.TextBoxFor(model => model.Impressions, new { maxLength = 5, autocomplete = "off", @class = "form-control" })
+                @Html.ValidationMessageFor(model => model.Impressions)
+            </div>
+            <a href="#" onclick="SaveInfo()">Save</a>
+            @Html.HiddenFor(model => model.ID)
+}
+        </div>
+    </div>
+    <br /><br />
+    <div id="dataTable"></div>
+</div>
+
+@section scripts{
+    <script src="~/Scripts/jquery.signalR-2.2.1.min.js"></script>
+    <script src="/signalr/hubs"></script>
+    <script type="text/javascript">
+
+        $(function () {
+            // Create a proxy to signalr hub on web server. It reference the hub.
+            var notificationFromHub = $.connection.devTestHub;
+
+            // Connect to signalr hub
+            $.connection.hub.start().done(function () {
+                FetchRecords();
+            });
+
+            // Notify to client with the recent updates
+            notificationFromHub.client.updatedClients = function () {
+                FetchRecords();
+            };
+        });
+        function FetchRecords() {
+            debugger;
+            var model = $('#dataTable');
+            $.ajax({
+                url: '/home/GetAllEmployeeRecords',
+                contentType: 'application/html ; charset:utf-8',
+                type: 'GET',
+                dataType: 'html'
+            })
+                .success(function (result) { model.empty().append(result); })
+        }
+
+        function SaveInfo()
+        {
+            debugger;
+
+            var form = $("#InfoForm");
+            form.validate();
+            if (form.valid()) {
+                var hdnId = $('#ID').val();
+                if (hdnId == 0) {
+                    InsertRecord();
+                }
+                else {
+                    UpdateRecord();
+                }
+            }
+            return false;
+        }
+
+        // Insert Employee Record
+        function InsertRecord() {
+            debugger;
+            var devTest = {
+                AffiliateName: $('#AffiliateName').val(),
+                CampaignName: $('#CampaignName').val(),
+                Clicks: $('#Clicks').val(),
+                Conversions: $('#Conversions').val(),
+                Impressions: $('#Impressions').val()
+            };
+
+
+            $.ajax({
+                url: '/home/Insert',
+                type: 'POST',
+                data: JSON.stringify(devTest),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    alert('Information added Successfully');
+                },
+                error: function () {
+                    alert('Information not Added');
+                }
+            });
+        }
+
+        // Update Employee Record
+        function UpdateRecord() {
+            debugger;
+            var devTest = {
+                AffiliateName: $('#AffiliateName').val(),
+                CampaignName: $('#CampaignName').val(),
+                Clicks: $('#Clicks').val(),
+                Conversions: $('#Conversions').val(),
+                Impressions: $('#Impressions').val(),
+                ID: $('#ID').val(),
+            };
+
+            $.ajax({
+                url: '/home/Update',
+                type: 'POST',
+                data: JSON.stringify(devTest),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    alert('Information updated Successfully');
+                },
+                error: function (e) {
+                    alert('Information could not be updated');
+                }
+            });
+        }
+
+        // Delete Employee Record
+        function DeleteRecord(val) {
+            debugger;
+            var devTest = {
+                ID: val
+            };
+
+            $.ajax({
+                url: '/home/Delete',
+                type: 'POST',
+                data: JSON.stringify(devTest),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    alert('Information deleted Successfully');
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+
+        function GetRecord(val) {
+            debugger;
+            var devTest = {
+                ID: val
+            };
+
+            $.ajax({
+                url: '/home/GetRecord',
+                type: 'POST',
+                data: JSON.stringify(devTest),
+                contentType: "application/json;charset=utf-8",
+                success: function (data) {
+                    $('#AffiliateName').val(data.AffiliateName);
+                    $('#CampaignName').val(data.CampaignName)
+                    $('#Clicks').val(data.Clicks);
+                    $('#Conversions').val(data.Conversions);
+                    $('#Impressions').val(data.Impressions);
+                    $('#ID').val(data.ID);
+                },
+                error: function (x, y, z) {
+                    alert(x + '\n' + y + '\n' + z);
+                }
+            });
+        }
+    </script>
+}
